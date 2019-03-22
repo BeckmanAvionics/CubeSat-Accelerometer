@@ -40,6 +40,9 @@ int main()
 	else
 		printf("success\n\n");
 
+	fstream data("D:\\CubeSat\\IMUoutput.csv");
+	data << "Accel Y, Accel Z, Gyro Y, Delta Theta Y, Accel Angle Y, Final Angle Y" << endl;
+
 	for (int i = 0; i < 49; i++) // 49 samples from ashwins data
 	{
 		getline(inFile, fgyro_y, ','); //reads gyro y data
@@ -67,8 +70,21 @@ int main()
 		finalAngle_y = compFilter(angle_gy, angle_ay); //needed to help calculate delta theta 
 		printf("final angle y is %.9f\n", finalAngle_y); //final angle
 		printf("------------------");
+
+		data << ("%.9f", median_ay);
+		data << ",";
+		data << ("%.9f", median_az);
+		data << ",";
+		data << ("%.9f", gyro_y);
+		data << ",";
+		data << ("%.9f", angle_gy);
+		data << ",";
+		data << ("%.9f", angle_ay);
+		data << ",";
+		data << ("%.9f", finalAngle_y) << endl;
 	}
-	cin.get(); //loser
+	data.close();
+	cin.get();
 }
 /*
 success
