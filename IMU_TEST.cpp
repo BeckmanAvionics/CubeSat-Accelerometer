@@ -134,6 +134,12 @@ int main(int argc, char *argv[])
 		}
 
 		//output for excel data table -> graph.
+		fstream data("output.csv")
+		data << "Accel X, Accel Y, Accel Z, Gyro X, Gyro Y, Gyro Z, Delta Theta X, Delta Theta Y, Delta Theta Z, Final Angle X, Final Angle Y, Final Angle Z" << endl;
+		for(int i = 0; i < 49; i++)
+		{
+			data << ("%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f", acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, angle_gx, angle_gy, angle_gz, finalAngle_x, finalAngle_y, finalAngle_z) << endl
+		}
 		usleep(DELTA_TIME);
 	}
 }
