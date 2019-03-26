@@ -14,7 +14,7 @@ using namespace std;
 #define SPLIT_MARKER 5
 #define FSR 1000 //FSR defined in gyroscope config in ICM 20602 datasheet
 #define GYRO_CONFIG 16
-
+#define RAD_TO_DEGREES 180/3.141592653589793238463
 
 int ready; // ready = 1 whenever enough accel values are read to run the median funciton
 	   //median filter and arctan for accel values only run whenever ready = 1
@@ -110,20 +110,20 @@ int main()
 		//arctan A for accel to convert raw values to angles
 		if (ready == 1)
 		{
-			angle_ax += atan2(median_ax, median_az);
-			angle_ay += atan2(median_ay, median_az);
-			angle_az += atan2(median_az, median_ay);
+			angle_ax = (atan2(median_ax, median_az) * RAD_TO_DEGREES);
+			angle_ay = (atan2(median_ay, median_az) * RAD_TO_DEGREES);
+			angle_az = (atan2(median_az, median_ay) * RAD_TO_DEGREES);
 		}
 
 		//integrate gyro values into angle
-		angle_gx += (gyro_x[i] + finalAngle_x) * DELTA_TIME;
-		angle_gy += (gyro_y[i] + finalAngle_y) * DELTA_TIME;
-		angle_gz += (gyro_z[i] + finalAngle_z) * DELTA_TIME;
+		angle_gx = (gyro_x[i] + finalAngle_x) * DELTA_TIME;
+		angle_gy = (gyro_y[i] + finalAngle_y) * DELTA_TIME;
+		angle_gz = (gyro_z[i] + finalAngle_z) * DELTA_TIME;
 
 		//complimentary filter
-		finalAngle_x += compFilter(angle_gx, angle_ax);
-		finalAngle_y += compFilter(angle_gy, angle_ay);
-		finalAngle_z += compFilter(angle_gz, angle_az);
+		finalAngle_x = compFilter(angle_gx, angle_ax);
+		finalAngle_y = compFilter(angle_gy, angle_ay);
+		finalAngle_z = compFilter(angle_gz, angle_az);
 
 		//output into a .csv file
 		data << ("%.9f", median_ax);
