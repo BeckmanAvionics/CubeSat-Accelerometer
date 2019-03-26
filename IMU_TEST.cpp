@@ -70,7 +70,7 @@ int read_imu(uint8_t card, uint8_t reg) //reads the raw values
 		return result;
 	}
 }
-int main(int argc, char *argv[])
+int main()
 {
 	uint_8t card = 0;
 	vector<double> acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z; //raw_values
