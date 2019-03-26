@@ -19,7 +19,7 @@ using namespace std;
 int ready; // ready = 1 whenever enough accel values are read to run the median funciton
 	   //median filter and arctan for accel values only run whenever ready = 1
 
-float compFilter(float accel_data, float gyro_data)
+double compFilter(double accel_data, double gyro_data)
 {
 	return GYRO_CONST * gyro_data + ACCEL_CONST * accel_data;
 }
