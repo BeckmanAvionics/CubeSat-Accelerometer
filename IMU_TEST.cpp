@@ -74,7 +74,7 @@ int main()
 {
 	uint_8t card = 0;
 	vector<double> acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z; //raw_values
-	double median_ax, median_ay, median_az, median_gx, median_gy, median_gz = 0;
+	double median_ax, median_ay, median_az = 0;
 	double angle_ax, angle_ay, angle_az = 0;
 	double angle_gx, angle_gy, angle_gz = 0;
 	double finalAngle_x, finalAngle_y, finalAngle_z = 0;
