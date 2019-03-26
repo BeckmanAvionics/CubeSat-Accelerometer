@@ -103,12 +103,9 @@ int main()
 		gyro_z.push_back(read_imu(card, 0x47)* FSR / (pow(2, 15) - 1));
 
 		//median filter for accel
-		if (ready == 1)
-		{
-			median_ax = median(acc_x);
-			median_ay = median(acc_y);
-			median_az = median(acc_z);
-		}
+		median_ax = median(acc_x);
+		median_ay = median(acc_y);
+		median_az = median(acc_z);
 
 		//arctan A for accel to convert raw values to angles
 		if (ready == 1)
