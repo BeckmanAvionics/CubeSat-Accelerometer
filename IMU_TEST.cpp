@@ -43,12 +43,14 @@ int median(vector<double> arr)
 		{
 			if (SPLIT_MARKER % 2 != 0)
 			{
+				ready = 1;		
 				sort(arr.end() - SPLIT_MARKER, arr.end());
 				return arr[arr.size() / 2];
 				arr.clear();
 			}
 			else
 			{
+				ready = 1;
 				sort(arr.end() - SPLIT_MARKER, arr.end());
 				return ((arr[arr.size() / 2 - 1]) + arr[arr.size() / 2 - 1]) / 2;
 				arr.clear();
@@ -101,12 +103,15 @@ int main(int argc, char *argv[])
 		gyro_z.push_back(read_imu(card, 0x47)* FSR / (pow(2,15)-1);
 
 		//median filter for accel
+		if (ready == 1)
+		{
 		median_ax = median(acc_x);
 		median_ay = median(acc_y);
 		median_az = median(acc_z);
-
+		}
+				 
 		//arctan A for accel
-		if (ready != 0)
+		if (ready == 1)
 		{
 			angle_ax += atan2(median_ax, median_az);
 			angle_ay += atan2(median_ay, median_az);
@@ -114,24 +119,16 @@ int main(int argc, char *argv[])
 		}
 
 		//integrate gyro values into angle
-		if (ready != 0)
-		{
-			if (i != 0)
-			{
-				angle_gx += (gyro_x[i] + finalAngle_x) * DELTA_TIME;
-				angle_gy += (gyro_y[i] + finalAngle_y) * DELTA_TIME;
-				angle_gz += (gyro_z[i] + finalAngle_z) * DELTA_TIME;
-			}
-		}
+		angle_gx += (gyro_x[i] + finalAngle_x) * DELTA_TIME;
+		angle_gy += (gyro_y[i] + finalAngle_y) * DELTA_TIME;
+		angle_gz += (gyro_z[i] + finalAngle_z) * DELTA_TIME;
 
 
 		//complimentary filter
-		if (ready != 0)
-		{
-			finalAngle_x += compFilter(angle_gx, angle_ax);
-			finalAngle_y += compFilter(angle_gy, angle_ay);
-			finalAngle_z += compFilter(angle_gz, angle_az);
-		}
+		finalAngle_x += compFilter(angle_gx, angle_ax);
+		finalAngle_y += compFilter(angle_gy, angle_ay);
+		finalAngle_z += compFilter(angle_gz, angle_az);
+			
 
 		//output for excel data table -> graph.
 		fstream data("output.csv")
