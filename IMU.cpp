@@ -116,10 +116,13 @@ int main()
 		}
 
 		//integrate gyro values into angle
-		angle_gx = (gyro_x[i] + finalAngle_x) * DELTA_TIME;
-		angle_gy = (gyro_y[i] + finalAngle_y) * DELTA_TIME;
-		angle_gz = (gyro_z[i] + finalAngle_z) * DELTA_TIME;
-
+		if (i == 0)
+		{
+			angle_gx = (gyro_x[i] + finalAngle_x) * DELTA_TIME;
+			angle_gy = (gyro_y[i] + finalAngle_y) * DELTA_TIME;
+			angle_gz = (gyro_z[i] + finalAngle_z) * DELTA_TIME;
+		}
+		
 		//complimentary filter
 		finalAngle_x = compFilter(angle_gx, angle_ax);
 		finalAngle_y = compFilter(angle_gy, angle_ay);
