@@ -1,11 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <stdio.h>
-#include <sidekiq_api.h>
+#include "../../sidekiq_core/inc/sidekiq_api.h"
 #include <cmath>
 #include<algorithm>
 #include <unistd.h>
 #include <fstream>
+#include <stdio.h>
 using namespace std;
 #define DELTA_TIME 10
 #define GYRO_CONST 0.98
@@ -15,6 +16,7 @@ using namespace std;
 #define FSR 1000 //FSR defined in gyroscope config in ICM 20602 datasheet
 #define GYRO_CONFIG 16
 #define RAD_TO_DEGREES 180/3.141592653589793238463
+#define VECTOR_SIZE 5
 
 int ready; // ready = 1 whenever enough accel values are read to run the median funciton
 	   //median filter and arctan for accel values only run whenever ready = 1
@@ -32,29 +34,37 @@ int median(vector<double> arr) //jesus idk what I was doing when making this
 	}
 	else
 	{
-		if (arr.size() >= (SPLIT_MARKER + 1))
-		{
-			arr.clear();
-		}
-		else
-		{
+//		if (arr.size() >= (SPLIT_MARKER + 1))
+//		{
+//			arr.clear();
+//		}
+	//	else
+	//	{
 			if (SPLIT_MARKER % 2 != 0)
 			{
 				ready = 1;
 				sort(arr.end() - SPLIT_MARKER, arr.end());
 				return arr[arr.size() / 2];
-				arr.clear();
 			}
 			else
 			{
 				ready = 1;
 				sort(arr.end() - SPLIT_MARKER, arr.end());
 				return ((arr[arr.size() / 2 - 1]) + arr[arr.size() / 2 - 1]) / 2;
-				arr.clear();
 			}
-		}
+
+//		}
 	}
 }
+
+vector<double> editVector(vector<double> arr) {
+	for (int i = 0; i < arr.size(); i++) {
+		if (i != arr.size()-1) {
+			arr.at(i) = arr.at(i+1);
+		}
+		return arr;
+	}
+} 
 
 int read_imu(uint8_t card, uint8_t reg) //reads the raw values
 {
@@ -70,9 +80,11 @@ int read_imu(uint8_t card, uint8_t reg) //reads the raw values
 		return result;
 	}
 }
+
+
 int main()
 {
-	uint_8t card = 0;
+	uint8_t card = 0;
 	vector<double> acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z; //raw_values
 	double median_ax, median_ay, median_az = 0;
 	double angle_ax, angle_ay, angle_az = 0;
@@ -89,8 +101,8 @@ int main()
 	left_side = config_byte >> 5;
 	left_side = config_byte << 5;
 	right_side = config_byte & 7;
-	left = left | right;
-	left = left | GYRO_CONFIG;
+	left_side = left_side | right_side;
+	left_side = left_side | GYRO_CONFIG;
 	skiq_write_accel_reg(card, 0x1B, &config_byte, 1);
 
 	for (int i = 0; i < PULL_NUMBER; i++) // 100HZ of data samples for 1 hr
@@ -106,6 +118,11 @@ int main()
 		median_ax = median(acc_x);
 		median_ay = median(acc_y);
 		median_az = median(acc_z);
+
+		//rolling median filter
+		editVector(acc_x);
+		editVector(acc_y);
+		editVector(acc_z);
 
 		//arctan A for accel to convert raw values to angles
 		if (ready == 1)
@@ -127,7 +144,7 @@ int main()
 		finalAngle_x = compFilter(angle_gx, angle_ax);
 		finalAngle_y = compFilter(angle_gy, angle_ay);
 		finalAngle_z = compFilter(angle_gz, angle_az);
-
+/*
 		//output into a .csv file
 		data << ("%.9f", median_ax);
 		data << ",";
@@ -152,7 +169,7 @@ int main()
 		data << ("%.9f", finalAngle_y);
 		data << ",";
 		data << ("%.9f", finalAngle_z) << endl;
-
+*/
 		usleep(DELTA_TIME);
 
 	}
