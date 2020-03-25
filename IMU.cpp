@@ -26,7 +26,7 @@ double compFilter(double accel_data, double gyro_data)
 	return GYRO_CONST * gyro_data + ACCEL_CONST * accel_data;
 }
 
-int median(vector<double> arr) //jesus idk what I was doing when making this
+int median(vector<double> arr)
 {
 	if (arr.size() < SPLIT_MARKER)
 	{
