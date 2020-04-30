@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "../../sidekiq_core/inc/sidekiq_api.h"
 #include <cmath>
-#include<algorithm>
+#include <algorithm>
 #include <unistd.h>
 #include <fstream>
 #include <stdio.h>
@@ -11,7 +11,7 @@ using namespace std;
 #define DELTA_TIME 10
 #define GYRO_CONST 0.98
 #define ACCEL_CONST 0.02
-#define PULL_NUMBER 360000
+#define PULL_NUMBER 100
 #define SPLIT_MARKER 5
 #define FSR 1000 //FSR defined in gyroscope config in ICM 20602 datasheet
 #define GYRO_CONFIG 16
@@ -91,8 +91,14 @@ int main()
 	double angle_gx, angle_gy, angle_gz = 0;
 	double finalAngle_x, finalAngle_y, finalAngle_z = 0;
 
+	fstream data;
+	data.open("imu_data.csv");
+	data << "Median Accel X, Median Accel Y, Median Accel Z, Raw Gyro X, Raw Gyro Y, Raw Gyro Z, Delta Theta X, Delta Theta Y, Delta Theta Z, filtered theta X, filtered theta Y, filtered theta Z" << endl;
+
+/*
 	fstream data("Path_To_File.csv");
 	data << "Median Accel X, Median Accel Y, Median Accel Z, Raw Gyro X, Raw Gyro Y, Raw Gyro Z, Delta Theta X, Delta Theta Y, Delta Theta Z, filtered theta X, filtered theta Y, filtered theta Z" << endl;
+*/
 
 	//this is the config code that changes the Gyro Config register to 1000dps
 	uint8_t config_byte = 0;
@@ -103,6 +109,11 @@ int main()
 	right_side = config_byte & 7;
 	left_side = left_side | right_side;
 	left_side = left_side | GYRO_CONFIG;
+
+	//intialize the sidekiq
+	skiq_init(skiq_xport_type_auto, skiq_xport_init_level_basic, &card, 1);
+	
+	//configure the above in the sidekiq
 	skiq_write_accel_reg(card, 0x1B, &config_byte, 1);
 
 	for (int i = 0; i < PULL_NUMBER; i++) // 100HZ of data samples for 1 hr
@@ -144,7 +155,7 @@ int main()
 		finalAngle_x = compFilter(angle_gx, angle_ax);
 		finalAngle_y = compFilter(angle_gy, angle_ay);
 		finalAngle_z = compFilter(angle_gz, angle_az);
-/*
+
 		//output into a .csv file
 		data << ("%.9f", median_ax);
 		data << ",";
@@ -169,10 +180,11 @@ int main()
 		data << ("%.9f", finalAngle_y);
 		data << ",";
 		data << ("%.9f", finalAngle_z) << endl;
-*/
+
 		usleep(DELTA_TIME);
 
 	}
 	data.close();
+	skiq_exit();
 }
 
