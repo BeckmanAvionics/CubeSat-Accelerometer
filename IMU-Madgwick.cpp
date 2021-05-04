@@ -8,6 +8,7 @@
 #include <fstream>
 #include <stdio.h>
 using namespace std;
+using namespace Eigen;
 #define DELTA_TIME 10
 #define GYRO_CONST 0.98
 #define ACCEL_CONST 0.02
@@ -181,9 +182,18 @@ int main()
 		finalAngle_y = compFilter(angle_gy, angle_ay);
 		finalAngle_z = compFilter(angle_gz, angle_az);*/
 
-		double q0 = 0.5, q1 = 0.5, q2 = 0.5, q3 = 0.5;
+		Quaternionf q;
+		
+		// Assuming roll is X, pitch is Y, and yaw is Z.
+		double roll = angle_gx, pitch = angle_gy, yaw = angle_gz;
 
-		filterStationary(angle_ax, angle_ay, angle_az, angle_gx, angle_gy, angle_gz, q0, q1, q2, q3);
+		q = AngleAxisf(roll, Vector3f::UnitX())
+			* AngleAxisf(pitch, Vector3f::UnitY())
+			* AngleAxisf(yaw, Vector3f::UnitZ());
+
+		//double q0 = 0.5, q1 = 0.5, q2 = 0.5, q3 = 0.5;
+
+		filterStationary(angle_ax, angle_ay, angle_az, angle_gx, angle_gy, angle_gz, q.w(), q.x(), q.y(), q.z());
 
 		//output into a .csv file
 		data << ("%.9f", median_ax);
