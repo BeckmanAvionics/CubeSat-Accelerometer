@@ -6,9 +6,12 @@
 #include <algorithm>
 #include <unistd.h>
 #include <fstream>
-#include <stdio.h>
+
+#include "imu_filter.h"
+#include "test_helpers.h"
 using namespace std;
-using namespace Eigen;
+// using namespace Eigen;
+
 #define DELTA_TIME 10
 #define GYRO_CONST 0.98
 #define ACCEL_CONST 0.02
