@@ -5,7 +5,8 @@
 #include <string.h>
 #include <string>
 #include <fstream>
-
+#include "imu_filter.h"
+#include "world_frame.h"
 
 using namespace std;
 
@@ -13,76 +14,138 @@ using namespace std;
 #define KGYRO 0.5
 #define KACCEL 0.5
 #define RAD_TO_DEGREES 180/3.141592653589793238463
+#define FILTER_ITERATIONS 10000
+
+template <WorldFrame::WorldFrame FRAME>
+void filterStationary(
+	float Ax, float Ay, float Az,
+	float Gx, float Gy, float Gz,
+	double& q0, double& q1, double& q2, double& q3) {
+	float dt = 0.1;
+	//float Gx = 0.0, Gy = 0.0, Gz = 0.0; // Stationary state => Gyro = (0,0,0)
+
+	ImuFilter filter;
+	filter.setDriftBiasGain(0.0);
+	filter.setAlgorithmGain(0.1);
+
+	// initialize with some orientation
+	filter.setOrientation(q0, q1, q2, q3);
+	filter.setWorldFrame(FRAME);
+
+	for (int i = 0; i < FILTER_ITERATIONS; i++) {
+		filter.madgwickAHRSupdateIMU(Gx, Gy, Gz, Ax, Ay, Az, dt);
+	}
+
+	filter.getOrientation(q0, q1, q2, q3);
+}
 
 double compFilter(double accel_data, double gyro_data)
 {
 	return KGYRO * gyro_data + KACCEL * accel_data;
 }
 
+float getLineAsFloat(ifstream& fileStream, string& outputVariable, const char* caption, char delimiter)
+{
+	getline(fileStream, outputVariable, delimiter);
+	printf(caption);
+
+	double result = atof(outputVariable.c_str());
+
+	printf(": %.9f\n", result);
+
+	return result;
+}
+
 int main()
 {
-	double gyro_y;  //raw_value
-	double median_ay, median_az;
+	//double gyro_y;  //raw_value
+	//double median_ay, median_az;
 	double angle_ay = 0;
 	double angle_gy = 0;
 	double finalAngle_y = 0;
 	double dTheta = 0;
 
-	string fgyro_y, faccel_y, faccel_z;
+	string nothing, fgyro_x, fgyro_y, fgyro_z, faccel_x, faccel_y, faccel_z;
 	ifstream inFile;
-	inFile.open("D:\\CubeSat\\IMUv2.csv");
+
+	printf("Reading IMUv2.csv...");
+
+	inFile.open("IMUv2.csv");
+
 	if (inFile.fail())
 	{
 		printf("failure\n");
 		cin.get();
 	}
 	else
+	{
 		printf("success\n\n");
+	}
 
-	fstream data("D:\\CubeSat\\IMUoutput.csv");
-	data << "Accel Y, Accel Z, Gyro Y, Delta Theta Y, Accel Angle Y, Final Angle Y" << endl;
+	//fstream data("D:\\CubeSat\\IMUoutput.csv");
+	//data << "Accel Y, Accel Z, Gyro Y, Delta Theta Y, Accel Angle Y, Final Angle Y" << endl;
+
+	getline(inFile, nothing, '\n'); // skip header line one
 
 	for (int i = 0; i < 49; i++) // 49 samples from ashwins data
 	{
-		getline(inFile, fgyro_y, ','); //reads gyro y data
-		getline(inFile, faccel_y, ','); //reads accel y data
-		getline(inFile, faccel_z, '\n'); //reads accel z data
 		printf("\nIteration %d\n", (i + 1));
-		gyro_y = atof(fgyro_y.c_str()); //converts string to double
-		printf("gyro y from csv is %.9f\n", gyro_y);
-		median_ay = atof(faccel_y.c_str()); //converts string to double
-		printf("accel y from csv is %.9f\n", median_ay);
-		median_az = atof(faccel_z.c_str()); //converts string to double
-		printf("accel z from csv is %.9f\n", median_az);
+
+		getline(inFile, nothing, '\n'); // skip header line two on first iteration, then move to the next line on all subsequent iteration
+		getline(inFile, nothing, ','); // skip Shimmer_B663_Timestamp_FormattedUnix_CAL
+
+		float accel_x = getLineAsFloat(inFile, faccel_x, "Accel X", ','); // Shimmer_B663_Accel_LN_X_CAL
+		float accel_y = getLineAsFloat(inFile, faccel_y, "Accel Y", ','); // Shimmer_B663_Accel_LN_Y_CAL
+		float accel_z = getLineAsFloat(inFile, faccel_z, "Accel Z", ','); // Shimmer_B663_Accel_LN_Z_CAL
+
+		getline(inFile, nothing, ','); // Shimmer_B663_Accel_WR_X_CAL
+		getline(inFile, nothing, ','); // Shimmer_B663_Accel_WR_Y_CAL
+		getline(inFile, nothing, ','); // Shimmer_B663_Accel_WR_Z_CAL
+
+		float gyro_x = getLineAsFloat(inFile, fgyro_x, "Gyro X", ','); // Shimmer_B663_Gyro_X_CAL
+		float gyro_y = getLineAsFloat(inFile, fgyro_y, "Gyro Y", ','); // Shimmer_B663_Gyro_Y_CAL
+		float gyro_z = getLineAsFloat(inFile, fgyro_z, "Gyro Z", ','); // Shimmer_B663_Gyro_Z_CAL
 
 		//arctan A for accel
-		angle_ay = (atan2(median_ay, median_az) * RAD_TO_DEGREES); 
-		printf("accel angle y is %.9f\n", angle_ay); //accel angle
+		//angle_ay = (atan2(median_ay, median_az) * RAD_TO_DEGREES);
+		//printf("accel angle y is %.9f\n", angle_ay); //accel angle
 
 		//integrate gyro values into angle
-		angle_gy = ((gyro_y * DELTA_TIME) + finalAngle_y); // added up delta thetas
-		dTheta = (gyro_y * DELTA_TIME);
-		printf("gyro angle y is %.9f\n", angle_gy); //gyro angle
-		printf("delta theta is %.9f\n", dTheta); //delta theta
+		//angle_gy = ((gyro_y * DELTA_TIME) + finalAngle_y); // added up delta thetas
+		//dTheta = (gyro_y * DELTA_TIME);
+		//printf("gyro angle y is %.9f\n", angle_gy); //gyro angle
+		//printf("delta theta is %.9f\n", dTheta); //delta theta
 
 		//complementary filter
 		finalAngle_y = compFilter(angle_gy, angle_ay); //needed to help calculate delta theta 
-		printf("final angle y is %.9f\n", finalAngle_y); //final angle
+
+		double q0 = .5, q1 = .5, q2 = .5, q3 = .5;
+
+		//float ax, ay, az, gx, gy, gz;
+		//filterStationary(ax, ay, az, gx, gy, gz, 0.0, 0.0, 0.0, 0.0);
+
+		//filterStationary<WorldFrame::NWU>(/* Acceleration */ 0.0, 0.0, -9.81, /* Magnetic */ 0.0005, 0.0, 0.0005, q0, q1, q2, q3);
+
+		filterStationary<WorldFrame::ENU>(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, q0, q1, q2, q3);
+
+		printf("Final Quaternion is < %.9f %.9f %.9f %.9f >\n", q0, q1, q2, q3);
+
+		//printf("final angle y is %.9f\n", finalAngle_y); //final angle
 		printf("------------------");
 
-		data << ("%.9f", median_ay);
-		data << ",";
-		data << ("%.9f", median_az);
-		data << ",";
+		//data << ("%.9f", median_ay);
+		//data << ",";
+		//data << ("%.9f", median_az);
+		/*data << ",";
 		data << ("%.9f", gyro_y);
 		data << ",";
 		data << ("%.9f", angle_gy);
 		data << ",";
 		data << ("%.9f", angle_ay);
 		data << ",";
-		data << ("%.9f", finalAngle_y) << endl;
+		data << ("%.9f", finalAngle_y) << endl;*/
 	}
-	data.close();
+	//data.close();
 	cin.get();
 }
 /*
