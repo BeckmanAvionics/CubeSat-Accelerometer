@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="IMU-Madgwick.cpp" />
     <ClCompile Include="imu_filter.cpp" />
     <ClCompile Include="testValues.cpp" />
   </ItemGroup>
@@ -33,6 +34,12 @@
   <ItemGroup>
     <ClInclude Include="imu_filter.h" />
     <ClInclude Include="test_helpers.h" />
+    <ClInclude Include="tf2\LinearMath\MinMax.h" />
+    <ClInclude Include="tf2\LinearMath\QuadWord.h" />
+    <ClInclude Include="tf2\LinearMath\Quaternion.h" />
+    <ClInclude Include="tf2\LinearMath\ros\macros.h" />
+    <ClInclude Include="tf2\LinearMath\Scalar.h" />
+    <ClInclude Include="tf2\LinearMath\Vector3.h" />
     <ClInclude Include="world_frame.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

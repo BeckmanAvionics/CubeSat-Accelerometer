@@ -21,6 +21,9 @@
     <ClCompile Include="testValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IMU-Madgwick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="imu_data-042920.csv" />
@@ -38,6 +41,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="world_frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tf2\LinearMath\Quaternion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tf2\LinearMath\QuadWord.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tf2\LinearMath\Vector3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tf2\LinearMath\ros\macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tf2\LinearMath\MinMax.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tf2\LinearMath\Scalar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
