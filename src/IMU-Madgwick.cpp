@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <fstream>
 
-#include "imu_filter.h"
-#include "test_helpers.h"
+#include "../include/imu_filter.h"
+#include "../include/test_helpers.h"
 using namespace std;
 // using namespace Eigen;
 
