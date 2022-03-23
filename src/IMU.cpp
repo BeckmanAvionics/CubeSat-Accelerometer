@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <stdio.h>
-#include "../../sidekiq_core/inc/sidekiq_api.h"
+#include "../include/sidekiq_api.h"
 #include <cmath>
 #include <algorithm>
 #include <unistd.h>

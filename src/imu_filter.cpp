@@ -23,7 +23,7 @@
  */
 
 #include <cmath>
-#include "imu_filter.h"
+#include "../include/imu_filter.h"
 
 // Fast inverse square-root
 // See: http://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Reciprocal_of_the_square_root
