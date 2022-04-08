@@ -1,16 +1,19 @@
 #include <iostream>
 #include <vector>
 #include <stdio.h>
-#include "../include/sidekiq_api.h"
+#include "../../sidekiq_core/inc/sidekiq_api.h"
 #include <cmath>
 #include <algorithm>
 #include <unistd.h>
 #include <fstream>
+#include <Eigen/Dense>
+#include "imu_filter.h"
+#include "test_helpers.h"
+//#include "sidekiq_api.h"
+#include "../../arg_parser/inc/arg_parser.h"
 
-#include "../include/imu_filter.h"
-#include "../include/test_helpers.h"
 using namespace std;
-// using namespace Eigen;
+using namespace Eigen;
 
 #define DELTA_TIME 10
 #define GYRO_CONST 0.98
@@ -28,8 +31,8 @@ int ready; // ready = 1 whenever enough accel values are read to run the median 
 #define FILTER_ITERATIONS 10000
 template <WorldFrame::WorldFrame FRAME>
 void filterStationary(
-	float Ax, float Ay, float Az,
-	float Gx, float Gy, float Gz,
+	double& Ax, double& Ay, double& Az,
+	double& Gx, double& Gy, double& Gz,
 	double& q0, double& q1, double& q2, double& q3) {
 	float dt = 0.1;
 	//float Gx = 0.0, Gy = 0.0, Gz = 0.0; // Stationary state => Gyro = (0,0,0)
@@ -113,6 +116,7 @@ int read_imu(uint8_t card, uint8_t reg) //reads the raw values
 
 int main()
 {
+	cout << "compiled" << endl;
 	uint8_t card = 0;
 	vector<double> acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z; //raw_values
 	double median_ax, median_ay, median_az = 0;
@@ -196,7 +200,12 @@ int main()
 
 		//double q0 = 0.5, q1 = 0.5, q2 = 0.5, q3 = 0.5;
 
-		filterStationary(angle_ax, angle_ay, angle_az, angle_gx, angle_gy, angle_gz, q.w(), q.x(), q.y(), q.z());
+double q0 = q.w();
+double q1 = q.x();
+double q2 = q.y();
+double q3 = q.z();
+
+		filterStationary<WorldFrame::ENU>(angle_ax, angle_ay, angle_az, angle_gx, angle_gy, angle_gz, q0, q1, q2, q3);
 
 		//output into a .csv file
 		data << ("%.9f", median_ax);
