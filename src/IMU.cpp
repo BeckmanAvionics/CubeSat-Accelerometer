@@ -34,26 +34,18 @@ int median(vector<double> arr)
 	}
 	else
 	{
-//		if (arr.size() >= (SPLIT_MARKER + 1))
-//		{
-//			arr.clear();
-//		}
-	//	else
-	//	{
-			if (SPLIT_MARKER % 2 != 0)
-			{
-				ready = 1;
-				sort(arr.end() - SPLIT_MARKER, arr.end());
-				return arr[arr.size() / 2];
-			}
-			else
-			{
-				ready = 1;
-				sort(arr.end() - SPLIT_MARKER, arr.end());
-				return ((arr[arr.size() / 2 - 1]) + arr[arr.size() / 2 - 1]) / 2;
-			}
-
-//		}
+		if (SPLIT_MARKER % 2 != 0)
+		{
+			ready = 1;
+			sort(arr.end() - SPLIT_MARKER, arr.end());
+			return arr[arr.size() / 2];
+		}
+		else
+		{
+			ready = 1;
+			sort(arr.end() - SPLIT_MARKER, arr.end());
+			return ((arr[arr.size() / 2 - 1]) + arr[arr.size() / 2 - 1]) / 2;
+		}
 	}
 }
 
